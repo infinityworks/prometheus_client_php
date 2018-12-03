@@ -1,6 +1,8 @@
 # A prometheus client library written in PHP
 
-[![Build Status](https://travis-ci.org/Jimdo/prometheus_client_php.svg?branch=master)](https://travis-ci.org/Jimdo/prometheus_client_php)
+! Note - This is a fork of the excellent Jimdo/prometheus_client_php that seems to have stopped being maintained.  This repository has the PR's that are open for the Jimdo/prometheus_client_php project merged in.
+
+[![Build Status](https://travis-ci.org/infinityworks/prometheus_client_php.svg?branch=master)](https://travis-ci.org/infinityworks/prometheus_client_php)
 
 This library uses Redis or APCu to do the client side aggregation.
 If using Redis, we recommend to run a local Redis instance next to your PHP workers.
