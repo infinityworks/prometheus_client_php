@@ -2,7 +2,10 @@
 
 namespace Prometheus;
 
-
+/**
+ * Class RenderTextFormat
+ * @package Prometheus
+ */
 class RenderTextFormat
 {
     const MIME_TYPE = 'text/plain; version=0.0.4';
@@ -13,12 +16,11 @@ class RenderTextFormat
      */
     public function render(array $metrics)
     {
-        usort($metrics, function(MetricFamilySamples $a, MetricFamilySamples $b)
-        {
+        usort($metrics, function (MetricFamilySamples $a, MetricFamilySamples $b) {
             return strcmp($a->getName(), $b->getName());
         });
 
-        $lines = array();
+        $lines = [];
 
         foreach ($metrics as $metric) {
             $lines[] = "# HELP " . $metric->getName() . " {$metric->getHelp()}";
@@ -30,26 +32,49 @@ class RenderTextFormat
         return implode("\n", $lines) . "\n";
     }
 
+    /**
+     * @param MetricFamilySamples $metric
+     * @param Sample $sample
+     * @return string
+     */
     private function renderSample(MetricFamilySamples $metric, Sample $sample)
     {
-        $escapedLabels = array();
-
         $labelNames = $metric->getLabelNames();
         if ($metric->hasLabelNames() || $sample->hasLabelNames()) {
-            $labels = array_combine(array_merge($labelNames, $sample->getLabelNames()), $sample->getLabelValues());
-            foreach ($labels as $labelName => $labelValue) {
-                $escapedLabels[] = $labelName . '="' . $this->escapeLabelValue($labelValue) . '"';
-            }
+            $labelNames = array_merge($labelNames, $sample->getLabelNames());
+            $escapedLabels = $this->getEscapedLabels($labelNames, $sample->getLabelValues());
+
             return $sample->getName() . '{' . implode(',', $escapedLabels) . '} ' . $sample->getValue();
         }
         return $sample->getName() . ' ' . $sample->getValue();
     }
 
-    private function escapeLabelValue($v)
+    /**
+     * @param array $labelNames
+     * @param array $values
+     * @return array
+     */
+    private function getEscapedLabels(array $labelNames, array $values) : array {
+        $escapedLabels = [];
+        if(count($labelNames) == count($values)) {
+            $labels = array_combine($labelNames, $values);
+            foreach ($labels as $labelName => $labelValue) {
+                $escapedLabels[] = $labelName . '="' . $this->escapeLabelValue($labelValue) . '"';
+            }
+        }
+
+        return $escapedLabels;
+    }
+
+    /**
+     * @param $value
+     * @return mixed
+     */
+    private function escapeLabelValue($value)
     {
-        $v = str_replace("\\", "\\\\", $v);
-        $v = str_replace("\n", "\\n", $v);
-        $v = str_replace("\"", "\\\"", $v);
-        return $v;
+        $value = str_replace("\\", "\\\\", $value);
+        $value = str_replace("\n", "\\n", $value);
+        $value = str_replace("\"", "\\\"", $value);
+        return $value;
     }
 }
